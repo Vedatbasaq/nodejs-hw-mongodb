@@ -12,7 +12,7 @@
     "remove-last": "node src/scripts/removeLastContact.js",
     "remove-all": "node src/scripts/removeAllContacts.js",
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "npm src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "http-errors": "^2.0.1",
     "mongodb": "^7.0.0",
     "mongoose": "^8.19.3",
     "pino": "^10.1.0"

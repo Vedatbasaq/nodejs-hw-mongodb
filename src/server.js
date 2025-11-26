@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
 import contactsRouter from './routers/contacts.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
 const logger = pino();
 
@@ -22,19 +24,12 @@ export const setupServer = () => {
 
   app.use('/contacts', contactsRouter);
 
-  app.use((req, res) => {
-    res.status(404).json({
-      message: 'Route not found'
-    });
-  });
+  app.use(notFoundHandler);
 
   app.use((err, req, res, next) => {
     logger.error(err.message);
-    res.status(500).json({
-      message: 'Something went wrong'
-    });
+    errorHandler(err, req, res, next);
   });
 
   return app;
 };
-
