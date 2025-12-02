@@ -8,7 +8,24 @@ export const initMongoConnection = async () => {
   const url = process.env.MONGODB_URL;
   const db = process.env.MONGODB_DB;
 
-  const connectionString = `mongodb+srv://${user}:${password}@${url}/${db}?retryWrites=true&w=majority`;
+  if (!user || !password || !url || !db) {
+    const missing = [
+      !user && 'MONGODB_USER',
+      !password && 'MONGODB_PASSWORD',
+      !url && 'MONGODB_URL',
+      !db && 'MONGODB_DB',
+    ].filter(Boolean).join(', ');
+    console.error(`Missing MongoDB env variables: ${missing}`);
+    process.exit(1);
+  }
+
+  const sanitizedUrl = url
+    .replace(/^mongodb\+srv:\/\//i, '')
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/.*/, '')
+    .replace(/\?.*/, '');
+
+  const connectionString = `mongodb+srv://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${sanitizedUrl}/${db}?retryWrites=true&w=majority`;
 
   try {
     await mongoose.connect(connectionString);
