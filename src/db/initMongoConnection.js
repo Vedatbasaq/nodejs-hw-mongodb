@@ -34,4 +34,4 @@ export const initMongoConnection = async () => {
     console.error('Mongo connection error:', error);
     process.exit(1);
   }
-};
+}; 
