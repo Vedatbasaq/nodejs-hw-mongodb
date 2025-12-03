@@ -9,6 +9,10 @@ const validators = {
     const len = value.trim().length;
     if (rules.min && len < rules.min) return `${key} must be at least ${rules.min} characters`;
     if (rules.max && len > rules.max) return `${key} must be at most ${rules.max} characters`;
+    if (rules.email) {
+      const emailRegex = /.+@.+\..+/;
+      if (!emailRegex.test(value)) return `${key} must be a valid email`;
+    }
     if (rules.enum && !rules.enum.includes(value)) return `${key} must be one of: ${rules.enum.join(', ')}`;
     return null;
   },
