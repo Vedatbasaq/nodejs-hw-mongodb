@@ -5,8 +5,20 @@ import 'dotenv/config';
 export const initMongoConnection = async () => {
   const user = process.env.MONGODB_USER;
   const password = process.env.MONGODB_PASSWORD;
-  const url = process.env.MONGODB_URL;
+  const url = process.env.MONGODB_URL || process.env.MONGO_URL;
   const db = process.env.MONGODB_DB;
+  const uri = process.env.MONGODB_URI;
+
+  if (uri) {
+    try {
+      await mongoose.connect(uri);
+      console.log('Mongo connection successfully established!');
+      return;
+    } catch (error) {
+      console.error('Mongo connection error:', error);
+      process.exit(1);
+    }
+  }
 
   if (!user || !password || !url || !db) {
     const missing = [
