@@ -12,7 +12,7 @@
     "remove-last": "node src/scripts/removeLastContact.js",
     "remove-all": "node src/scripts/removeAllContacts.js",
     "dev": "nodemon src/index.js",
-    "start": "node index.js"
+    "start": "node src/index.js" 
   },
   "keywords": [],
   "author": "",
