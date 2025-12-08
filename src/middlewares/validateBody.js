@@ -1,7 +1,7 @@
 import createError from 'http-errors';
 
 const isString = (v) => typeof v === 'string';
-const isBoolean = (v) => typeof v === 'boolean';
+const isBoolean = (v) => typeof v === 'boolean' || v === 'true' || v === 'false';
 
 const validators = {
   string: (key, value, rules) => {

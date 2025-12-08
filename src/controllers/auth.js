@@ -1,7 +1,9 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
-import { findUserByEmail, createUser, deleteSessionsByUserId, createSession, findSessionByRefreshToken, deleteSessionByIdAndToken } from '../services/auth.js';
+import { findUserByEmail, createUser, deleteSessionsByUserId, createSession, findSessionByRefreshToken, deleteSessionByIdAndToken, generateResetToken, sendResetEmail, updateUserPassword } from '../services/auth.js';
 import { randomBytes } from 'crypto';
+ 
+import jwt from 'jsonwebtoken';
 
 export const registerController = async (req, res, next) => {
   try {
@@ -157,6 +159,57 @@ export const logoutController = async (req, res, next) => {
     res.clearCookie('refreshToken');
     res.clearCookie('sessionId');
     res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const sendResetEmailController = async (req, res, next) => {
+  try {
+    const { email } = req.body || {};
+    const existing = await findUserByEmail(email);
+    if (!existing) {
+      throw createHttpError(404, 'User not found!');
+    }
+    const token = generateResetToken(email);
+    try {
+      await sendResetEmail(email, token);
+    } catch {
+      throw createHttpError(500, 'Failed to send the email, please try again later.');
+    }
+    res.status(200).json({
+      status: 200,
+      message: 'Reset password email has been successfully sent.',
+      data: {},
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const resetPwdController = async (req, res, next) => {
+  try {
+    const { token, password } = req.body || {};
+    const secret = process.env.JWT_SECRET;
+    try {
+      const payload = jwt.verify(token, secret);
+      const email = payload?.email;
+      const user = await findUserByEmail(email);
+      if (!user) {
+        throw createHttpError(404, 'User not found!');
+      }
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      await updateUserPassword(String(user._id), passwordHash);
+      await deleteSessionsByUserId(String(user._id));
+      res.status(200).json({
+        status: 200,
+        message: 'Password has been successfully reset.',
+        data: {},
+      });
+    } catch {
+      next(createHttpError(401, 'Token is expired or invalid.'));
+    }
   } catch (err) {
     next(err);
   }

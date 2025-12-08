@@ -1,4 +1,5 @@
 import { getContactById, createContact, updateContact, deleteContact, getContactsPaginated } from '../services/contacts.js';
+import { uploadImageBuffer } from '../utils/cloudinary.js';
 import createError from 'http-errors';
 
 export const getContactsController = async (req, res, next) => {
@@ -52,7 +53,18 @@ export const createContactController = async (req, res, next) => {
     }
 
     const userId = req.user?._id || req.user?.id;
-    const created = await createContact({ name, phoneNumber, email, isFavourite, contactType, userId });
+    const favValue = typeof isFavourite === 'string' ? isFavourite === 'true' : isFavourite;
+    let photoUrl;
+    if (req.file?.buffer) {
+      try {
+        photoUrl = await uploadImageBuffer(req.file.buffer);
+      } catch {
+        return next(createError(500, 'Failed to upload photo'));
+      }
+    }
+    const payload = { name, phoneNumber, email, isFavourite: favValue, contactType, userId };
+    if (photoUrl) payload.photo = photoUrl;
+    const created = await createContact(payload);
 
     res.status(201).json({
       status: 201,
@@ -69,6 +81,17 @@ export const updateContactController = async (req, res, next) => {
     const { contactId } = req.params;
     const payload = req.body || {};
     const userId = req.user?._id || req.user?.id;
+    if (typeof payload.isFavourite === 'string') {
+      payload.isFavourite = payload.isFavourite === 'true';
+    }
+    if (req.file?.buffer) {
+      try {
+        const url = await uploadImageBuffer(req.file.buffer);
+        payload.photo = url;
+      } catch {
+        return next(createError(500, 'Failed to upload photo'));
+      }
+    }
     const updated = await updateContact(contactId, payload, userId);
     if (!updated) {
       throw createError(404, 'Contact not found');
