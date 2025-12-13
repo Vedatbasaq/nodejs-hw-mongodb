@@ -2,6 +2,7 @@ import { User } from '../db/models/users.js';
 import { Session } from '../db/models/sessions.js';
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
 
 export const findUserByEmail = async (email) => {
   return User.findOne({ email });
@@ -40,16 +41,15 @@ export const updateUserPassword = async (userId, passwordHash) => {
 };
 
 export const generateResetToken = (email) => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT secret is not configured');
+  if (!process.env.JWT_SECRET) {
+    process.env.JWT_SECRET = randomBytes(32).toString('hex');
   }
-  return jwt.sign({ email }, secret, { expiresIn: '5m' });
+  return jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
 };
 
 export const sendResetEmail = async (email, token) => {
   const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT);
+  const port = Number(process.env.SMTP_PORT || 2525);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASSWORD;
   const from = process.env.SMTP_FROM;
