@@ -25,6 +25,10 @@ export const setupServer = () => {
   app.get('/', (req, res) => {
     res.json({ message: 'Server is running!' });
   });
+  
+  app.post('/', (req, res) => {
+    res.json({ message: 'Server is running!', method: 'POST' });
+  });
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
@@ -45,7 +49,8 @@ export const setupServer = () => {
   app.get('/reset-password', (req, res) => {
     res.json({
       status: 200,
-      message: 'Reset password page. Please use POST /auth/reset-pwd with your token and new password.',
+      message:
+        'Reset password page. Please use POST /auth/reset-pwd with your token and new password.',
       data: { token: req.query.token },
     });
   });
