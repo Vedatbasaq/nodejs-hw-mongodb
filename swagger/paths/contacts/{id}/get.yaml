@@ -1,0 +1,19 @@
+operationId: getContactById
+summary: Get contact by id
+description: Retrieve a single contact by its identifier.
+tags:
+  - Contacts
+security:
+  - bearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: Contact identifier
+    schema:
+      type: string
+responses:
+  '200':
+    description: Successfully found contact
+  '404':
+    description: Contact not found

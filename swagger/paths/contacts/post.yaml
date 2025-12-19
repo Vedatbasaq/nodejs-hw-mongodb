@@ -1,0 +1,48 @@
+operationId: createContact
+summary: Create a new contact
+description: Create a contact. Supports JSON body and optional photo upload via multipart/form-data.
+tags:
+  - Contacts
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          phoneNumber:
+            type: string
+          email:
+            type: string
+          isFavourite:
+            type: boolean
+          contactType:
+            type: string
+            enum: [work, home, personal]
+        required: [name, phoneNumber, contactType]
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          phoneNumber:
+            type: string
+          email:
+            type: string
+          isFavourite:
+            type: boolean
+          contactType:
+            type: string
+            enum: [work, home, personal]
+          photo:
+            type: string
+            format: binary
+        required: [name, phoneNumber, contactType]
+responses:
+  '201':
+    description: Contact created successfully

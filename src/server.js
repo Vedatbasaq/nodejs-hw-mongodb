@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
 import usersRouter from './routers/users.js';
@@ -29,6 +33,20 @@ export const setupServer = () => {
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
   app.use('/users', usersRouter);
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const swaggerJsonPath = path.resolve(__dirname, '../docs/swagger.json');
+  let swaggerDocument = {};
+  try {
+    swaggerDocument = JSON.parse(fs.readFileSync(swaggerJsonPath, 'utf-8'));
+  } catch {
+    swaggerDocument = {
+      openapi: '3.0.0',
+      info: { title: 'API Docs', version: '1.0.0' },
+      paths: {},
+    };
+  }
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
