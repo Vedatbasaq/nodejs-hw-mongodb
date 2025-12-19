@@ -10,7 +10,7 @@ info:
 tags: []
 servers:
   - url: http://localhost:3000
-  - url: https://your-deployment.example.com
+  - url: https://hw7-swagger-gps9.onrender.com
 paths:
   /contacts/{contactId}:
     get:
