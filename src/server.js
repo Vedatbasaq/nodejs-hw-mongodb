@@ -29,6 +29,9 @@ export const setupServer = () => {
   app.get('/', (req, res) => {
     res.json({ message: 'Server is running!' });
   });
+  app.post('/', (req, res) => {
+    res.json({ message: 'Server is running!', method: 'POST' });
+  });
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
