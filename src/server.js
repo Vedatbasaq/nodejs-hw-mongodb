@@ -4,6 +4,7 @@ import pino from 'pino';
 import cookieParser from 'cookie-parser';
 import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
+import usersRouter from './routers/users.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
@@ -27,11 +28,35 @@ export const setupServer = () => {
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
+  app.use('/users', usersRouter);
+
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
+  app.get('/favicon.ico', (req, res) => {
+    res.status(204).send();
+  });
+
+  app.get('/robots.txt', (req, res) => {
+    res.type('text/plain').send('User-agent: *\nDisallow:');
+  });
+
+  app.get('/reset-password', (req, res) => {
+    res.json({
+      status: 200,
+      message: 'Reset password page. Please use POST /auth/reset-pwd with your token and new password.',
+      data: { token: req.query.token },
+    });
+  });
 
   app.use(notFoundHandler);
 
   app.use((err, req, res, next) => {
-    logger.error(err.message);
+    logger.error(
+      { status: err.status || 500, method: req.method, url: req.originalUrl },
+      err.message,
+    );
     errorHandler(err, req, res, next);
   });
 
