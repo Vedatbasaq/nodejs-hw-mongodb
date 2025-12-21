@@ -55,12 +55,25 @@ export const sendResetEmail = async (email, token) => {
   const from = process.env.SMTP_FROM;
   const appDomain = process.env.APP_DOMAIN;
 
+  if (!host || !port || !user || !pass || !from) {
+    throw new Error('Missing SMTP configuration');
+  }
+
   const transporter = nodemailer.createTransport({
     host,
     port,
     secure: port === 465,
     auth: { user, pass },
+    logger: process.env.NODE_ENV !== 'production',
+    debug: process.env.NODE_ENV !== 'production',
   });
+
+  try {
+    await transporter.verify();
+  } catch (e) {
+    console.error('SMTP verify failed', { code: e?.code, response: e?.response });
+    throw e;
+  }
 
   const base = appDomain?.replace(/\/$/, '') || 'http://localhost:3000';
   const link = `${base}/reset-password?token=${encodeURIComponent(token)}`;
@@ -70,6 +83,7 @@ export const sendResetEmail = async (email, token) => {
     to: email,
     subject: 'Reset your password',
     html: `Click the link to reset your password: <a href="${link}">${link}</a>`,
+    text: `Reset your password: ${link}`,
   });
   return info;
 };
